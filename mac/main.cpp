@@ -1,11 +1,14 @@
 
 #include <MNN/expr/Executor.hpp>
 
+#include <iostream>
+
 #define NUM_OF_THREADS 4
 int main(int argc, const char* argv[]) {
 
     if (argc < 2) {
-        MNN_ERROR("./main.a [model_path]\n");
+        MNN_ERROR("Please specify a model path\n");
+        MNN_ERROR("USAGE:./main.a [model_path]\n");
         return 0;
     }
 
@@ -21,8 +24,18 @@ int main(int argc, const char* argv[]) {
 
     // Loading a model
     auto model = MNN::Express::Variable::loadMap(modelFileName);
+    // static std::map<std::string, VARP> loadMap(const uint8_t* buffer, size_t length);
     auto inputOutput = MNN::Express::Variable::getInputAndOutput(model);
 
+    std::map<std::string, MNN::Express::VARP> inputs = inputOutput.first;
+    std::map<std::string, MNN::Express::VARP> outputs = inputOutput.second;
+    for(std::map<std::string, MNN::Express::VARP>::iterator iter = inputs.begin(); iter != inputs.end(); ++iter)
+    {
+        std::string k =  iter->first;
+        std::cout<<"Key:"<<k<<std::endl;
+    }
+
+    std::cout<<inputs.begin()->first<<std::endl;
     // Populating a model
 
     // Get model results
