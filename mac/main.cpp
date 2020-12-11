@@ -80,10 +80,9 @@ int main(int argc, const char* argv[]) {
     // for(std::map<std::string, MNN::Tensor>::iterator iter = inputs.begin(); iter != inputs.end(); ++iter) std::cout<<"Input key:"<<iter->first<<std::endl;
     // for(std::map<std::string, MNN::Tensor>::iterator iter = outputs.begin(); iter != outputs.end(); ++iter) std::cout<<"Output key:"<<iter->first<<std::endl;
 
-    // std::cout<<"Input dimensions:" << input->dimensions() << std::endl;
-
+    
     if (input->elementSize() <= 4) {
-        interpreter->resizeTensor(input, {1, 3, 128, 128}); // Batch, Channel, Width, Height
+        interpreter->resizeTensor(input, {1, 1, 100, 12}); // Batch, Channel, Width, Height
         interpreter->resizeSession(session);
     }
     
@@ -99,32 +98,33 @@ int main(int argc, const char* argv[]) {
     std::cout<<"Creating an input copy:" <<std::endl; 
     MNN::Tensor inputCache(input);
     const int input_size = inputCache.elementSize();
-    auto input_data= inputCache.host<int8_t>();
+    std::cout<<"DEBUG:Input dimensions:" << input_size << std::endl;
+    auto input_data= inputCache.host<float>();
     for(int i = 0; i < input_size; ++i){
-        input_data[i] = static_cast<int8_t>(i);
+        input_data[i] = static_cast<float>(1);
     }
 
     input->copyFromHostTensor(&inputCache);
 
     std::cout<<"Creating an output copy:" <<std::endl; 
     MNN::Tensor* output = interpreter->getSessionOutput(session, nullptr);
-    MNN::Tensor outputCopy(output, MNN::Tensor::TENSORFLOW); // Use tensorflow here for this model only
+    MNN::Tensor outputCopy(output); // Use tensorflow here for this model only MNN::Tensor::TENSORFLOW
 
     std::cout<<"Running a session:" <<std::endl; 
-    auto output_test_data= output->host<int8_t>();
-    for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output before:" << (int)output_test_data[i] << std::endl;}
+    auto output_test_data= output->host<float>();
+    for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output before:" << output_test_data[i] << std::endl;}
     
     AUTOTIME;
-    for(int i = 0; i < 3; i ++){
+    for(int i = 0; i < 1; i ++){
         std::cout << "=============== Round:" << i << std::endl;
         interpreter->runSession(session);
-        output_test_data= output->host<int8_t>();
-        for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output after:" << (int)output_test_data[i] << std::endl;}
+        output_test_data= output->host<float>();
+        for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output after:" << output_test_data[i] << std::endl;}
         
         output->copyToHostTensor(&outputCopy);
         std::cout<<"Printing copied output:" << outputCopy.elementSize() <<std::endl; 
-        output_test_data = outputCopy.host<int8_t>();
-        for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output res:" << (int)output_test_data[i] << std::endl;}
+        output_test_data = outputCopy.host<float>();
+        for(int i = 0; i < outputCopy.elementSize(); ++i){ std::cout<<"Output res:" << output_test_data[i] << std::endl;}
     }
     
     for(auto dim : output->shape()) std::cout << "Output shape:" << dim << std::endl;
