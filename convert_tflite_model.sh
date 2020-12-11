@@ -1,0 +1,1 @@
+./mnn-mac/MNNConvert -f TFLITE -modelFile model/emgplus.tflite --MNNModel model/emgplus.mnn --bizCode biz
