@@ -46,9 +46,17 @@ int express_demo(model_path){
 */
 int main(int argc, const char* argv[]) {
 
+    if (argc < 2) {
+        MNN_ERROR("Please specify a model path\n");
+        MNN_ERROR("USAGE:./main.a [model_path]\n");
+        return 0;
+    }
 
-    auto interpreter = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromFile(model_path));
-    // auto interpreter = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromBuffer(model_buff, size));
+    auto model_path = argv[1];
+    FUNC_PRINT_ALL(model_path, s);
+
+    MNN::Interpreter* interpreter = MNN::Interpreter::createFromFile(model_path);
+    // auto Interpreter* = std::shared_ptr<MNN::Interpreter>(MNN::Interpreter::createFromBuffer(model_buff, size));
 
     MNN::ScheduleConfig config;
     config.type      = MNN_FORWARD_AUTO; // Use GPU and fallback to CPU
@@ -112,5 +120,13 @@ int main(int argc, const char* argv[]) {
     for(auto dim : output->shape()) std::cout << "Output shape:" << dim << std::endl;
 
     AUTOTIME;
+
+    
+    // Populating a model
+    //MNN::Express::VARP input_data = MNN::Express::_Input({1,32}, MNN::Express::NC4HW4);
+    //input_data->setName("data");
+
+    // model.forward();
+    // Get model results
 
 }
