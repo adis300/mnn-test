@@ -50,21 +50,24 @@ int main(int argc, const char* argv[]) {
 
     std::cout<<"Creating an input copy:" <<std::endl; 
     MNN::Tensor inputCache(input);
+    float* input_test_buff = (float*)malloc(1250* sizeof(float));
+
     const int input_size = inputCache.elementSize();
     std::cout<<"DEBUG:Input dimensions:" << input_size << std::endl;
-    auto input_data= inputCache.host<float>();
+    auto input_data= input->host<float>();
     for(int i = 0; i < input_size; ++i){
+        input_test_buff[i] = 1;
         input_data[i] = static_cast<float>(1);
     }
-
-    input->copyFromHostTensor(&inputCache);
+    MNN::Tensor* inputTestTensor = MNN::Tensor::create<float>({1, 1, 1, 1250}, input_test_buff);
+    input->copyFromHostTensor(inputTestTensor);
 
     std::cout<<"Creating an output copy:" <<std::endl; 
     MNN::Tensor* output = interpreter->getSessionOutput(session, nullptr);
     MNN::Tensor outputCopy(output); // Use tensorflow here for this model only MNN::Tensor::TENSORFLOW
 
     std::cout<<"Running a session:" <<std::endl; 
-    auto output_test_data= output->host<float>();
+    float* output_test_data= output->host<float>();
     for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output before:" << output_test_data[i] << std::endl;}
     
     AUTOTIME;
@@ -72,7 +75,7 @@ int main(int argc, const char* argv[]) {
         std::cout << "=============== Round:" << i << std::endl;
         interpreter->runSession(session);
         output_test_data= output->host<float>();
-        for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output after:" << output_test_data[i] << std::endl;}
+        for(int i = 0; i < outputCopy.elementSize(); ++i){ std::cout<<"Output after:" << output_test_data[i] << std::endl;}
         
         output->copyToHostTensor(&outputCopy);
         std::cout<<"Printing copied output:" << outputCopy.elementSize() <<std::endl; 
