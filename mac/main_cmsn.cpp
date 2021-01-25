@@ -66,9 +66,9 @@ int main(int argc, const char* argv[]) {
     MNN::Tensor* output = interpreter->getSessionOutput(session, nullptr);
     MNN::Tensor outputCopy(output); // Use tensorflow here for this model only MNN::Tensor::TENSORFLOW
 
-    std::cout<<"Running a session:" <<std::endl; 
+    std::cout << "Running a session:" <<std::endl; 
     float* output_test_data= output->host<float>();
-    for(int i = 0; i < 10/*outputCopy.elementSize()*/; ++i){ std::cout<<"Output before:" << output_test_data[i] << std::endl;}
+    for(int i = 0; i < output->elementSize(); ++i){ std::cout<<"Output before:" << output_test_data[i] << std::endl;}
     
     AUTOTIME;
     for(int i = 0; i < 1; i ++){
@@ -83,7 +83,8 @@ int main(int argc, const char* argv[]) {
         for(int i = 0; i < outputCopy.elementSize(); ++i){ std::cout<<"Output res:" << output_test_data[i] << std::endl;}
     }
     
-    for(auto dim : output->shape()) std::cout << "Output shape:" << dim << std::endl;
+    std::cout << "Output size:" << output -> elementSize() << std::endl;
+    for(auto dim : output -> shape()) std::cout << "Output shape:" << dim << std::endl;
 
     AUTOTIME;
 
